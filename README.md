@@ -3,7 +3,7 @@ Example run:
 ```
 go run cmd/main.go 17055250
 ```
-## Go Multithreading
+## Go Multithreading (PT-BR)
 Neste desafio você terá que usar o que aprendemos com Multithreading e APIs para buscar o resultado mais rápido entre duas APIs distintas.
 
 As duas requisições serão feitas simultaneamente para as seguintes APIs:
@@ -15,7 +15,7 @@ Os requisitos para este desafio são:
 - [x] O resultado da request deverá ser exibido no command line com os dados do endereço, bem como qual API a enviou.
 - [x] Limitar o tempo de resposta em 1 segundo. Caso contrário, o erro de timeout deve ser exibido.
 
-# Go Multithreading
+## Go Multithreading (EN)
 In this challenge, you will need to use what we learned about Multithreading and APIs to fetch the fastest result from two different APIs.
 
 The two requests will be made simultaneously to the following APIs:
