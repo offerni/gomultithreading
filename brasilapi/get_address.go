@@ -9,6 +9,7 @@ import (
 )
 
 const baseUrl string = "https://brasilapi.com.br/api/cep/v1"
+const ServiceName string = "Brasil API"
 
 func GetAddress(ctx context.Context, cep string) (*address, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s/%s", baseUrl, cep), nil)

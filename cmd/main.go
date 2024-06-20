@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -12,8 +13,10 @@ import (
 	"github.com/offerni/gomultithreading/viacep"
 )
 
+const timeoutDeadline time.Duration = time.Second
+
 func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), timeoutDeadline)
 	defer cancel()
 
 	addressChannel := make(chan gomultithreading.AddressResponse)
@@ -25,39 +28,47 @@ func main() {
 
 	go getAddressFromViaCep(ctx, addressChannel, cep)
 
-	adJson, err := json.Marshal(<-addressChannel)
-	if err != nil {
-		panic(err)
+	select {
+	case address := <-addressChannel:
+		adJson, err := json.Marshal(address)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(string(adJson))
+	case <-ctx.Done():
+		log.Printf("%s Timeout reached, Context canceled", timeoutDeadline)
 	}
-
-	fmt.Println(string(adJson))
 }
 
 func getAddressFromBrasilApi(ctx context.Context, ch chan<- gomultithreading.AddressResponse, cep string) {
+	// time.Sleep(time.Second) // Uncomment this to force returning results from the other API
 	brasilApiAddress, err := brasilapi.GetAddress(ctx, cep)
 	if err != nil {
 		panic(err)
 	}
+	fmt.Printf("Got it from %s:\n", brasilapi.ServiceName)
 	ch <- gomultithreading.AddressResponse{
 		Cep:          brasilApiAddress.Cep,
 		City:         brasilApiAddress.City,
 		Neighborhood: brasilApiAddress.Neighborhood,
-		Service:      "brasilapi",
+		Service:      brasilapi.ServiceName,
 		State:        brasilApiAddress.State,
 		Street:       brasilApiAddress.Street,
 	}
 }
 
 func getAddressFromViaCep(ctx context.Context, ch chan<- gomultithreading.AddressResponse, cep string) {
+	// time.Sleep(time.Second) // Uncomment this to force returning results from the other API
 	viacepAddress, err := viacep.GetAddress(ctx, cep)
 	if err != nil {
 		panic(err)
 	}
+	fmt.Printf("Got it from %s:\n", viacep.ServiceName)
 	ch <- gomultithreading.AddressResponse{
 		Cep:          viacepAddress.Cep,
 		City:         viacepAddress.Localidade,
 		Neighborhood: viacepAddress.Bairro,
-		Service:      "viacep",
+		Service:      viacep.ServiceName,
 		State:        viacepAddress.Uf,
 		Street:       viacepAddress.Logradouro,
 	}
