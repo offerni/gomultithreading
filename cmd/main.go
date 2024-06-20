@@ -24,9 +24,9 @@ func main() {
 	// hack just to get the first argument
 	cep := os.Args[1]
 
-	go getAddressFromBrasilApi(ctx, addressChannel, cep)
+	go buildAddressFromBrasilApi(ctx, addressChannel, cep)
 
-	go getAddressFromViaCep(ctx, addressChannel, cep)
+	go buildAddressFromViaCep(ctx, addressChannel, cep)
 
 	select {
 	case address := <-addressChannel:
@@ -40,7 +40,7 @@ func main() {
 	}
 }
 
-func getAddressFromBrasilApi(ctx context.Context, ch chan<- gomultithreading.AddressResponse, cep string) {
+func buildAddressFromBrasilApi(ctx context.Context, ch chan<- gomultithreading.AddressResponse, cep string) {
 	// time.Sleep(time.Second) // Uncomment this if you want to test forcing returning results from the other concurrent API call
 	brasilApiAddress, err := brasilapi.GetAddress(ctx, cep)
 	if err != nil {
@@ -57,7 +57,7 @@ func getAddressFromBrasilApi(ctx context.Context, ch chan<- gomultithreading.Add
 	}
 }
 
-func getAddressFromViaCep(ctx context.Context, ch chan<- gomultithreading.AddressResponse, cep string) {
+func buildAddressFromViaCep(ctx context.Context, ch chan<- gomultithreading.AddressResponse, cep string) {
 	// time.Sleep(time.Second) // Uncomment this if you want to test forcing returning results from the other concurrent API call
 	viacepAddress, err := viacep.GetAddress(ctx, cep)
 	if err != nil {
