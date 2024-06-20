@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/offerni/gomultithreading"
+	"github.com/offerni/gomultithreading/brasilapi"
 	"github.com/offerni/gomultithreading/viacep"
 )
 
@@ -14,38 +16,49 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	// address, err := brasilapi.GetAddress(ctx, "17055250")
-	// if err != nil {
-	// 	panic(err)
-	// }
+	addressChannel := make(chan gomultithreading.AddressResponse)
 
-	// addressResponse := gomultithreading.AddressResponse{
-	// 	Cep:          address.Cep,
-	// 	City:         address.City,
-	// 	Neighborhood: address.Neighborhood,
-	// 	Service:      "brasilapi",
-	// 	State:        address.State,
-	// 	Street:       address.Street,
-	// }
+	// hack just to get the first argument
+	cep := os.Args[1]
 
-	address, err := viacep.GetAddress(ctx, "17055250")
-	if err != nil {
-		panic(err)
-	}
+	go getAddressFromBrasilApi(ctx, addressChannel, cep)
 
-	addressResponse := gomultithreading.AddressResponse{
-		Cep:          address.Cep,
-		City:         address.Localidade,
-		Neighborhood: address.Bairro,
-		Service:      "viacep",
-		State:        address.Uf,
-		Street:       address.Logradouro,
-	}
+	go getAddressFromViaCep(ctx, addressChannel, cep)
 
-	adJson, err := json.Marshal(addressResponse)
+	adJson, err := json.Marshal(<-addressChannel)
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Println(string(adJson))
+}
+
+func getAddressFromBrasilApi(ctx context.Context, ch chan<- gomultithreading.AddressResponse, cep string) {
+	brasilApiAddress, err := brasilapi.GetAddress(ctx, cep)
+	if err != nil {
+		panic(err)
+	}
+	ch <- gomultithreading.AddressResponse{
+		Cep:          brasilApiAddress.Cep,
+		City:         brasilApiAddress.City,
+		Neighborhood: brasilApiAddress.Neighborhood,
+		Service:      "brasilapi",
+		State:        brasilApiAddress.State,
+		Street:       brasilApiAddress.Street,
+	}
+}
+
+func getAddressFromViaCep(ctx context.Context, ch chan<- gomultithreading.AddressResponse, cep string) {
+	viacepAddress, err := viacep.GetAddress(ctx, cep)
+	if err != nil {
+		panic(err)
+	}
+	ch <- gomultithreading.AddressResponse{
+		Cep:          viacepAddress.Cep,
+		City:         viacepAddress.Localidade,
+		Neighborhood: viacepAddress.Bairro,
+		Service:      "viacep",
+		State:        viacepAddress.Uf,
+		Street:       viacepAddress.Logradouro,
+	}
 }

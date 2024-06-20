@@ -8,10 +8,10 @@ import (
 	"net/http"
 )
 
-const baseurl string = "https://brasilapi.com.br/api/cep/v1"
+const baseUrl string = "https://brasilapi.com.br/api/cep/v1"
 
 func GetAddress(ctx context.Context, cep string) (*address, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s/%s", baseurl, cep), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s/%s", baseUrl, cep), nil)
 	if err != nil {
 		return nil, err
 	}
