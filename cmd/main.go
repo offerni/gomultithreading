@@ -36,12 +36,12 @@ func main() {
 		}
 		fmt.Println(string(adJson))
 	case <-ctx.Done():
-		log.Printf("%s Timeout reached, Context canceled", timeoutDeadline)
+		log.Fatalf("%s Timeout reached, Context canceled", timeoutDeadline)
 	}
 }
 
 func getAddressFromBrasilApi(ctx context.Context, ch chan<- gomultithreading.AddressResponse, cep string) {
-	// time.Sleep(time.Second) // Uncomment this to force returning results from the other API
+	// time.Sleep(time.Second) // Uncomment this if you want to test forcing returning results from the other concurrent API call
 	brasilApiAddress, err := brasilapi.GetAddress(ctx, cep)
 	if err != nil {
 		panic(err)
@@ -58,7 +58,7 @@ func getAddressFromBrasilApi(ctx context.Context, ch chan<- gomultithreading.Add
 }
 
 func getAddressFromViaCep(ctx context.Context, ch chan<- gomultithreading.AddressResponse, cep string) {
-	// time.Sleep(time.Second) // Uncomment this to force returning results from the other API
+	// time.Sleep(time.Second) // Uncomment this if you want to test forcing returning results from the other concurrent API call
 	viacepAddress, err := viacep.GetAddress(ctx, cep)
 	if err != nil {
 		panic(err)
